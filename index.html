@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<title>Peace Blur</title>
+
+</head>
+<body>
+
+
+<div class="stage">
+  <video id="video" playsinline></video>
+  <canvas id="canvas"></canvas>
+  <div id="status" class="status">Menunggu tangan...</div>
+  <button id="muteMusicBtn" class="icon-btn stage-volume" aria-label="Matikan musik" disabled>
+    <i class="bi bi-volume-up-fill" id="volumeIcon"></i>
+  </button>
+</div>
+
+<div class="controls">
+    <button id="startBtn">Mulai Kamera & Musik</button>
+    <button id="stopBtn" class="secondary" disabled>Berhenti</button>
+</div>
+
+
+<div class="player-info">
+  <div class="vinyl" id="vinyl"></div>
+  <div class="song-title" id="songTitle">Sal priadi - Foto Kita Blur</div>
+</div>
+
+<footer class="made-by">
+  project iseng <strong>galihwikuu</strong>
+</footer>
+
+  <audio id="bgMusic" loop src="musik.wav"></audio>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
