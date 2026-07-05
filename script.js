@@ -65,7 +65,7 @@ hands.onResults((results) => {
     });
   }
 
-  ctx.filter = peaceDetected ? 'blur(3px)' : 'none';
+  canvas.style.filter = peaceDetected ? 'blur(18px)' : 'none';
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   ctx.restore();
 

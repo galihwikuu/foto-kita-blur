@@ -145,6 +145,10 @@
   to{ transform:rotate(360deg); }
 }
 
+canvas{
+  transition: filter 0.15s ease;
+}
+
 .peace-icon {
     width: 32px;
     height: 32px;
