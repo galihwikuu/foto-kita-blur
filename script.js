@@ -5,7 +5,15 @@ const statusEl = document.getElementById('status');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const bgMusic = document.getElementById('bgMusic');
+const muteMusicBtn = document.getElementById('muteMusicBtn');
 const vinyl = document.getElementById('vinyl');
+const countdownEl = document.getElementById('countdown');
+const resultSection = document.getElementById('resultSection');
+const stripPreview = document.getElementById('stripPreview');
+const showResultBtn = document.getElementById('showResultBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const retakeBtn = document.getElementById('retakeBtn');
+let capturedShots = [];
 const songTitle = document.getElementById('songTitle');
 const SONG_NAME = "Sal Priadi - Foto kita blur"; // ganti sesuai musik kamu
 
@@ -109,6 +117,7 @@ startBtn.addEventListener('click', async () => {
     height: 480
   });
   await camera.start();
+  runPhotoBooth();
 });
 
 stopBtn.addEventListener('click', () => {
@@ -123,6 +132,10 @@ stopBtn.addEventListener('click', () => {
   statusEl.classList.remove('active');
 });
 
+bgMusic.addEventListener('ended', () => {
+  stopBtn.click(); // trigger logic yang sama persis dengan tombol Berhenti
+});
+
 muteMusicBtn.addEventListener('click', () => {
   const icon = document.getElementById('volumeIcon');
   if (bgMusic.paused) {
@@ -135,3 +148,141 @@ muteMusicBtn.addEventListener('click', () => {
     icon.className = 'bi bi-volume-mute-fill';
   }
 });
+
+showResultBtn.addEventListener('click', () => {
+  resultSection.hidden = false;
+  showResultBtn.hidden = true;
+});
+
+function countdownStep(seconds) {
+  return new Promise((resolve) => {
+    let s = seconds;
+    countdownEl.classList.add('show');
+    countdownEl.textContent = s;
+    const interval = setInterval(() => {
+      s--;
+      if (s > 0) {
+        countdownEl.textContent = s;
+      } else {
+        clearInterval(interval);
+        countdownEl.classList.remove('show');
+        resolve();
+      }
+    }, 1000);
+  });
+}
+
+async function runPhotoBooth() {
+  capturedShots = [];
+
+  await new Promise(r => setTimeout(r, 1300));
+  await triggerFlash();
+  capturePhoto();
+  await new Promise(r => setTimeout(r, 3200));
+
+  for (let i = 1; i < 3; i++) {
+    await countdownStep(3);
+    await triggerFlash();
+    capturePhoto();
+    if (i < 2) {
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+
+  const dataUrl = composeStrip();
+  stripPreview.src = dataUrl;
+  downloadBtn.href = dataUrl;
+  showResultBtn.hidden = false;
+}
+
+retakeBtn.addEventListener('click', () => {
+  resultSection.hidden = true;
+  showResultBtn.hidden = true;
+  stopBtn.click();  // pastikan kamera lama berhenti dulu
+  startBtn.click();  // baru mulai ulang
+});
+
+function capturePhoto() {
+  const shot = document.createElement('canvas');
+  shot.width = canvas.width;
+  shot.height = canvas.height;
+  shot.getContext('2d').drawImage(canvas, 0, 0);
+  capturedShots.push(shot);
+}
+
+const FRAME_PRESETS = {
+  brutalist: {
+    bg: '#ffffff',
+    outline: '#111111',
+    outlineWidth: 6
+  }
+};
+
+
+let selectedFrame = 'brutalist';
+
+document.querySelectorAll('.frame-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const frame = btn.dataset.frame;
+
+    if (!FRAME_PRESETS[frame]) {
+      alert('Frame ini masih Coming Soon 👀');
+      return;
+    }
+
+    selectedFrame = frame;
+    document.querySelectorAll('.frame-option').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    if (capturedShots.length > 0) {
+      const dataUrl = composeStrip();
+      stripPreview.src = dataUrl;
+      downloadBtn.href = dataUrl;
+    }
+  });
+});
+
+// const frameImages = {};
+// Object.keys(FRAME_PRESETS).forEach(key => {
+//   const img = new Image();
+//   img.src = FRAME_PRESETS[key].image;
+//   frameImages[key] = img;
+// });
+
+function composeStrip() {
+  const preset = FRAME_PRESETS[selectedFrame];
+  const padding = 20;
+  const gap = 16;
+  const w = capturedShots[0].width;
+  const h = capturedShots[0].height;
+  const bottomExtra = preset.bottomLabel ? preset.bottomHeight : 0;
+
+  const stripCanvas = document.createElement('canvas');
+  stripCanvas.width = w + padding * 2;
+  stripCanvas.height = h * capturedShots.length + gap * (capturedShots.length - 1) + padding * 2 + bottomExtra;
+
+  const ctx2 = stripCanvas.getContext('2d', { alpha: false });
+  ctx2.fillStyle = preset.bg;
+  ctx2.fillRect(0, 0, stripCanvas.width, stripCanvas.height);
+
+  capturedShots.forEach((shot, i) => {
+    const y = padding + i * (h + gap);
+    ctx2.drawImage(shot, padding, y);
+    ctx2.strokeStyle = preset.outline;
+    ctx2.lineWidth = preset.outlineWidth;
+    ctx2.strokeRect(padding, y, w, h);
+  });
+
+  return stripCanvas.toDataURL('image/png');
+}
+
+
+function triggerFlash() {
+  return new Promise((resolve) => {
+    const flashEl = document.getElementById('flash');
+    flashEl.classList.remove('active');
+    void flashEl.offsetWidth; // reset animasi biar bisa retrigger
+    flashEl.classList.add('active');
+    setTimeout(resolve, 300);
+  });
+}

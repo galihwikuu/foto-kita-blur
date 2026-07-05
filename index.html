@@ -18,6 +18,8 @@
   <button id="muteMusicBtn" class="icon-btn stage-volume" aria-label="Matikan musik" disabled>
     <i class="bi bi-volume-up-fill" id="volumeIcon"></i>
   </button>
+  <div id="countdown" class="countdown"></div>
+  <div id="flash" class="flash"></div>
 </div>
 
 <div class="controls">
@@ -25,6 +27,21 @@
     <button id="stopBtn" class="secondary" disabled>Berhenti</button>
 </div>
 
+<button id="showResultBtn" class="show-result-btn" hidden>Lihat Hasil Photobooth</button>
+
+<div id="resultSection" class="result-section" hidden>
+  <div class="frame-picker">
+    <button class="frame-option selected" data-frame="brutalist">Neobrutalist</button>
+  <button class="frame-option" data-frame="polaroid">Polaroid</button>
+  <button class="frame-option" data-frame="neon">Neon Glow</button>
+  <button class="frame-option" data-frame="pastel">Pastel</button>
+</div>
+  <img id="stripPreview" alt="Hasil photobooth">
+  <div class="result-actions">
+    <a id="downloadBtn" class="download-btn" download="photobooth.png">Download Foto</a>
+    <button id="retakeBtn" class="download-btn">Foto Ulang</button>
+  </div>
+</div>
 
 <div class="player-info">
   <div class="vinyl" id="vinyl"></div>
@@ -35,7 +52,7 @@
   project iseng <strong>galihwikuu</strong>
 </footer>
 
-  <audio id="bgMusic" loop src="musik.wav"></audio>
+<audio id="bgMusic" src="musik.wav"></audio>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 <script src="script.js"></script>
