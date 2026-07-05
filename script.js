@@ -73,6 +73,18 @@ hands.onResults((results) => {
   statusEl.classList.toggle('active', peaceDetected);
 });
 
+// Minta izin kamera lebih awal saat halaman dibuka
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    // langsung matikan lagi, cuma buat trigger izin di awal
+    stream.getTracks().forEach(track => track.stop());
+  } catch (err) {
+    console.warn('Izin kamera ditolak atau gagal:', err);
+  }
+});
+
+
 // --- Start / Stop ---
 startBtn.addEventListener('click', async () => {
   startBtn.disabled = true;
