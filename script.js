@@ -169,6 +169,12 @@ function countdownStep(seconds) {
     countdownEl.classList.add('show');
     countdownEl.textContent = s;
     const interval = setInterval(() => {
+      if (!sessionActive) {
+        clearInterval(interval);
+        countdownEl.classList.remove('show');
+        resolve();
+        return;
+      }
       s--;
       if (s > 0) {
         countdownEl.textContent = s;
