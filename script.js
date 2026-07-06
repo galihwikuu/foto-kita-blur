@@ -14,6 +14,7 @@ const showResultBtn = document.getElementById('showResultBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const retakeBtn = document.getElementById('retakeBtn');
 let capturedShots = [];
+let sessionActive = false;
 const songTitle = document.getElementById('songTitle');
 const SONG_NAME = "Sal Priadi - Foto kita blur"; // ganti sesuai musik kamu
 
@@ -27,12 +28,19 @@ function isFingerUp(landmarks, tipIdx, pipIdx) {
   return landmarks[tipIdx].y < landmarks[pipIdx].y;
 }
 
-function isThumbUp(landmarks, handedness) {
-  // handedness "Right"/"Left" dari sudut pandang kamera (sudah di-mirror)
-  if (handedness === 'Right') {
-    return landmarks[4].x < landmarks[3].x;
-  }
-  return landmarks[4].x > landmarks[3].x;
+function isThumbFolded(landmarks) {
+  // Jarak ujung jempol (4) ke pangkal kelingking (17)
+  const dx1 = landmarks[4].x - landmarks[17].x;
+  const dy1 = landmarks[4].y - landmarks[17].y;
+  const thumbToPinky = Math.hypot(dx1, dy1);
+
+  // Ukuran telapak tangan sebagai referensi skala (pergelangan ke pangkal jari tengah)
+  const dx2 = landmarks[0].x - landmarks[9].x;
+  const dy2 = landmarks[0].y - landmarks[9].y;
+  const palmSize = Math.hypot(dx2, dy2);
+
+  // Jempol dianggap "terlipat" kalau jaraknya ke pangkal kelingking kecil
+  return thumbToPinky < palmSize * 1.1; // 1.1 = ambang batas, bisa disesuaikan
 }
 
 function detectPeace(landmarks, handedness) {
@@ -40,9 +48,8 @@ function detectPeace(landmarks, handedness) {
   const middle = isFingerUp(landmarks, 12, 10);
   const ring = isFingerUp(landmarks, 16, 14);
   const pinky = isFingerUp(landmarks, 20, 18);
-  const thumb = isThumbUp(landmarks, handedness);
-  // strict: index & middle naik, thumb/ring/pinky turun
-  return index && middle && !thumb && !ring && !pinky;
+  const thumbFolded = isThumbFolded(landmarks);
+  return index && middle && thumbFolded && !ring && !pinky;
 }
 
 // --- Setup MediaPipe Hands ---
@@ -96,6 +103,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 // --- Start / Stop ---
 startBtn.addEventListener('click', async () => {
   startBtn.disabled = true;
+  sessionActive = true;
   stopBtn.disabled = false;
   muteMusicBtn.disabled = false;
 
@@ -121,6 +129,7 @@ startBtn.addEventListener('click', async () => {
 });
 
 stopBtn.addEventListener('click', () => {
+  sessionActive = false;
   if (camera) camera.stop();
   bgMusic.pause();
   vinyl.classList.remove('playing');
@@ -176,16 +185,22 @@ async function runPhotoBooth() {
   capturedShots = [];
 
   await new Promise(r => setTimeout(r, 1300));
+  if (!sessionActive) return;
   await triggerFlash();
+  if (!sessionActive) return;
   capturePhoto();
-  await new Promise(r => setTimeout(r, 3200));
+  await new Promise(r => setTimeout(r, 2800));
+  if (!sessionActive) return;
 
   for (let i = 1; i < 3; i++) {
     await countdownStep(3);
+    if (!sessionActive) return;
     await triggerFlash();
+    if (!sessionActive) return;
     capturePhoto();
     if (i < 2) {
       await new Promise(r => setTimeout(r, 2000));
+      if (!sessionActive) return;
     }
   }
 
